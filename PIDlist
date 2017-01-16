@@ -1,0 +1,26 @@
+#include "types.h"
+#include "stat.h"
+#include "user.h"
+
+
+int main () {
+	printf(1, "The Process Statistics are : \n");
+	printf(1, "slot\tPID\tHigh\tLow\n");
+
+ 	struct pstat st;
+	GetAllPIDs(&st);
+
+	int i;
+	for (i=0 ; i < NPROC ; i++)
+		if (st.inuse{i})
+			printf(1, "%d\t%d\t%d\t%d\t%s\n" , i , st.PID[i] , st.hticks[i] , st.lticks[i] , st.name[i]);
+		
+
+
+
+
+
+
+
+
+
