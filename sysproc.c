@@ -50,42 +50,27 @@ return proc-> parent -> pid;
 
 }
 //prj
-int getPerformanceData(int *wtime, int *rtime)
+int 
+sys_getPerformanceData(void)
 {
- struct proc *p;
-  int havekids, pid;
+ 	int *wtime;
+	int *rtime;
+	if(argptr(0, (char**)&wtime, sizeof(int)) < 0)
+    return -1;
 
-  acquire(&ptable.lock);
-  for(;;){
-    // Scan through table looking for exited children.
-    havekids = 0;
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->parent != proc)
-        continue;
-      havekids = 1;
-      if(p->state == ZOMBIE){ 
+  if(argptr(1, (char**)&rtime, sizeof(int)) < 0)
+    return -1;
+    return getPerformanceData(wtime, rtime);
+}
 
-//prj////////////////////////////////////////////////////////////////
-	*wtime = etime - ctime - rtime ;
-	*rtime = rtime ;
 
-        // Found one.
-        pid = p->pid;
-        kfree(p->kstack);
-        p->kstack = 0;
-        freevm(p->pgdir);
-        p->pid = 0;
-        p->parent = 0;
-        p->name[0] = 0;
-        p->killed = 0;
-        p->state = UNUSED;
-        release(&ptable.lock);
-//prj////////////////////////////////////////////////////////////////
-	*wtime = etime - ctime - rtime ;
-	  *rtime = rtime ;
-        return pid;
-      }
 
+
+//prj/////////////////////////////////////////////////////////////
+int 
+nice (){
+
+return 0 ;
 }
 
 int
@@ -139,29 +124,6 @@ sys_uptime(void)
 ////////////////// OUR FUNCTION /////////////////////
 
 //struct pstat pstat; 
-/*
-int
-sys_GetAllPIDs(void)
-{
-
-struct pstat *st;
-	if (argptr( 0, (void*)&st, sizeof(*st) ) < 0 )
-		return -1;
-	int i; 
-	for(i=0 ; i< NPROC ; i++)
-		st-> inuse[i] = pstat.inuse[i],
-		st-> pid[i] = pstat.pid[i],
-		st-> name[i][0] = pstat.name[i][0],
-			st->name[i][1] = pstat.name[i][1],
-				st-> name[i][2] = pstat.name[i][2],
-		st-> inuse[i] = pstat.hticks[i],
-		st-> lticks[i] = pstat.lticks[i];
-
-	return 0 ;
-
-}
-
-*/
 
 
 

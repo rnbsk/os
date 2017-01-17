@@ -36,13 +36,13 @@ pinit(void)
 static struct proc*
 allocproc(void)
 {
-  struct proc *p;
+  struct proc *p ; 
   char *sp;
 
 //prj
-  p->ctime = ticks;
- /////prj
-selection = (rtime/(ticks - ctime))
+ 
+  proc ->ctime = ticks;
+
 //
   acquire(&ptable.lock);
 
@@ -93,6 +93,61 @@ pstat.lticks[p.ptable.proc] = 0;
 
 //PAGEBREAK: 32
 // Set up first user process.
+int 
+getPerformanceData(int *wtime, int *rtime)
+{
+ 
+     struct proc *p;
+  int havekids, pid;
+
+  acquire(&ptable.lock);
+  for(;;){
+    // Scan through table looking for zombie children.
+    havekids = 0;
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->parent != proc)
+        continue;
+      havekids = 1;
+      if(p->state == ZOMBIE){
+        // Found one.
+
+        // Added time field update, else same from wait system call
+        *wtime = p->etime - p->ctime - p->rtime ;
+        *rtime = p->rtime;
+
+        // same as wait 
+        pid = p->pid;
+        kfree(p->kstack);
+        p->kstack = 0;
+        freevm(p->pgdir);
+        p->state = UNUSED;
+        p->pid = 0;
+        p->parent = 0;
+        p->name[0] = 0;
+        p->killed = 0;
+        release(&ptable.lock);
+        return pid;
+      }
+    // No point waiting if we don't have any children.
+    if(!havekids || proc->killed){
+      release(&ptable.lock);
+      return -1;
+    }
+
+    // Wait for children to exit.  (See wakeup1 call in proc_exit.)
+    sleep(proc, &ptable.lock);  //DOC: wait-sleep
+  }
+}
+    }
+
+int 
+nice(void){
+
+return 0;
+
+
+}
+
 void
 userinit(void)
 {
@@ -173,7 +228,7 @@ fork(void)
   np->sz = proc->sz;
   np->parent = proc;
   *np->tf = *proc->tf;
-  ctime = 
+  
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
@@ -216,7 +271,8 @@ exit(void)
     }
 
 //prj
-	etime = ticks ;
+
+	proc->etime = ticks ;
   }
 
   begin_op();
@@ -243,11 +299,11 @@ exit(void)
 
 //prj
 
-  proc->etime = ticks;// update enatime
+ // proc->etime = ticks;// update enatime
   sched();
   panic("zombie exit");
  
-sche
+
 
 
 }
@@ -306,7 +362,7 @@ wait(void)
 void
 scheduler(void)
 {
-  struct proc *p;
+ 
 //prj
 	
 		
@@ -316,10 +372,10 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-
+ 
 
   #ifdef RR
-
+struct proc *p;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
@@ -356,7 +412,7 @@ scheduler(void)
           }
         }
         if (min!=NULL){
-          p = min;//the process with the smallest creation time
+          p = min;//the process with the smallest creation time////////////???prj
           proc = p;
           switchuvm(p);
           p->state = RUNNING;
@@ -369,6 +425,35 @@ scheduler(void)
 
    #ifdef GRT
   	struct proc *minSel = NULL;
+	selection = (rtime/(ticks - ctime));
+        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+          if(p->state == RUNNABLE){
+            if (minSel!=NULL){
+              if(p->selection < minSel->selection)
+                minSel = p;
+            }
+            else
+              minSel = p;
+          }
+        }
+        if (minSel!=NULL){
+          p	 = minSel;//the process with the smallest creation time
+          proc = p;
+          switchuvm(p);
+          p->state = RUNNING;
+          swtch(&cpu->scheduler, proc->context);
+          switchkvm();
+          // Process is done running for now.
+          // It should have changed its p->state before coming back.
+           proc = 0;
+       }
+
+   #ifdef 3Q
+
+
+if( p->priority == 3 )
+{
+		struct proc *minSel = NULL;
         for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
           if(p->state == RUNNABLE){
             if (minSel!=NULL){
@@ -390,9 +475,55 @@ scheduler(void)
           // It should have changed its p->state before coming back.
            proc = 0;
        }
+		
+}
 
-   #ifdef
 
+if( p->priority == 2 )
+{
+		
+        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+          if(p->state == RUNNABLE){
+            if (min!=NULL){
+              if(p->ctime < min->ctime)
+                min = p;
+            }
+            else
+              min = p;
+          }
+        }
+        if (min!=NULL){
+          p = min;//the process with the smallest creation time
+          proc = p;
+          switchuvm(p);
+          p->state = RUNNING;
+          swtch(&cpu->scheduler, proc->context);
+          switchkvm();
+          // Process is done running for now.
+          // It should have changed its p->state before coming back.
+           proc = 0;
+       }
+
+}
+
+if( p->priority == 1 )
+{
+	 for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state != RUNNABLE)
+        continue;
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+      proc = p;
+      switchuvm(p);
+      p->state = RUNNING;
+      swtch(&cpu->scheduler, p->context);
+      switchkvm();
+	
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      proc = 0;}
+}
    #endif
    #endif
    #endif

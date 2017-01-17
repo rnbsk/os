@@ -28,6 +28,7 @@ SYSCALL(dup)
 SYSCALL(getpid)
 SYSCALL(GetPPID)     /////////////////////////
 SYSCALL(getPerformanceData)    //prj /////////////////////////
+SYSCALL(nice)  // prj//////////////////
 SYSCALL(sbrk)
 SYSCALL(sleep)
 SYSCALL(uptime)

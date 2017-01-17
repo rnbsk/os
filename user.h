@@ -24,7 +24,9 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int GetPPID(void);////////////////////////
-int getPerformanceData(int *wtime, int *rtime);//prj////////////////////////
+int getPerformanceData(int* , int* );//prj////////////////////////
+int nice();     //prj/////////////////////////////
+
 
 // ulib.c
 int stat(char*, struct stat*);

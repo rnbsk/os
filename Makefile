@@ -173,7 +173,7 @@ UPROGS=\
 	_usertests\
 	_wc\
 	_zombie\
-	_Parent\
+	_parent\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
